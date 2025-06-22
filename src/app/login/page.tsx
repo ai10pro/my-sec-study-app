@@ -1,14 +1,17 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import NextLink from "next/link";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner, faRightToBracket } from "@fortawesome/free-solid-svg-icons";
 import { twMerge } from "tailwind-merge";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/app/_components/Button";
+import { LoginRequest, loginRequestSchema } from "../_types/LoginRequest";
 
 const Page: React.FC = () => {
   const c_Email = "email";
@@ -16,6 +19,28 @@ const Page: React.FC = () => {
 
   const router = useRouter();
   const [isLoginCompleted, setIsLoginCompleted] = useState(false);
+
+  const formMethods = useForm<LoginRequest>({
+    mode: "onChange",
+    resolver: zodResolver(loginRequestSchema),
+  });
+  const fieldErrors = formMethods.formState.errors;
+
+  // ルートエラー（サーバサイドで発生した認証エラー）の表示設定の関数
+  const setRootError = (errorMsg: string) => {
+    formMethods.setError("root", {
+      type: "manual",
+      message: errorMsg,
+    });
+  };
+
+  // 初期設定
+  useEffect(() => {
+    // クエリパラメータからメールアドレスの初期値をセット
+    const searchParams = new URLSearchParams(window.location.search);
+    const email = searchParams.get(c_Email);
+    formMethods.setValue(c_Email, email || "");
+  }, [formMethods]);
 
   return (
     <main>
