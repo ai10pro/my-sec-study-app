@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Header from "@/app/_components/Header";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { config } from "@fortawesome/fontawesome-svg-core";
 
 export const metadata: Metadata = {
   title: "My-Sec-Study-app",
@@ -15,10 +18,8 @@ const RootLayout: React.FC<Props> = (props) => {
   return (
     <html lang="ja">
       <body>
-        <header>
-          <div className="bg-slate-800 text-white font-bold py-2">Header</div>
-        </header>
-        <div>{children}</div>
+        <Header />
+        <main className="mx-4 mt-2 max-w-3xl md:mx-auto">{props.children}</main>
       </body>
     </html>
   );
