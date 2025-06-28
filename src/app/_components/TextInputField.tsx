@@ -19,7 +19,7 @@ const input = tv({
       true: "cursor-default bg-gray-100 text-gray-500 focus:border-gray-300 focus:ring-0",
     },
     error: {
-      true: "border-red-500 focus:border-red-500 focus:ring-red-500",
+      false: "border-red-500 focus:border-red-500 focus:ring-red-500",
     },
   },
   defaultVariants: {
