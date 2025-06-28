@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import NextLink from "next/link";
@@ -12,6 +12,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/app/_components/Button";
 import { LoginRequest, loginRequestSchema } from "../_types/LoginRequest";
+import { TextInputField } from "@/app/_components/TextInputField";
+import { ErrorMsgField } from "@/app/_components/ErrorMsgField";
+import { UserProfile, userProfileSchema } from "../_types/UserProfile";
 
 const Page: React.FC = () => {
   const c_Email = "email";
@@ -19,7 +22,10 @@ const Page: React.FC = () => {
 
   const router = useRouter();
   const [isLoginCompleted, setIsLoginCompleted] = useState(false);
+  const [isPending, setIsPending] = useState(false); // ログイン処理中の状態を管理
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null); // ユーザープロフィールの状態を管理
 
+  // フォームの処理関連の準備と設定
   const formMethods = useForm<LoginRequest>({
     mode: "onChange",
     resolver: zodResolver(loginRequestSchema),
@@ -42,6 +48,25 @@ const Page: React.FC = () => {
     formMethods.setValue(c_Email, email || "");
   }, [formMethods]);
 
+  // ルートエラーメッセージの解消に関する設定
+  useEffect(() => {
+    const subscription = formMethods.watch((value, { name }) => {
+      // ルートエラーがある場合、メールアドレスまたはパスワードの入力があればエラーをクリア
+      if (name === c_Email || name === c_Password) {
+        formMethods.clearErrors("root");
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [formMethods]);
+
+  // ログイン完了後の処理
+  useEffect(() => {
+    if (isLoginCompleted) {
+      router.replace("/"); // ログイン完了後、トップページへリダイレクト
+      router.refresh(); // ページをリフレッシュ
+    }
+  }, [isLoginCompleted, router]);
+
   return (
     <main>
       <div className="text-2xl font-bold">
@@ -62,22 +87,43 @@ const Page: React.FC = () => {
           <label htmlFor={c_Email} className="mb-2 block font-bold">
             メールアドレス
           </label>
-          {/* <TextInputField	>を定義して使用 option=> formMethods(c_email), fieldErrors */}
-          {/* <ErrorMsgField>を定義して使用 */}
+          <TextInputField
+            {...formMethods.register(c_Email)}
+            id={c_Email}
+            placeholder="name@example.com"
+            type="email"
+            disabled={isPending || isLoginCompleted} // ログイン処理中またはログイン完了後は入力不可
+            error={!fieldErrors.email}
+            autoComplete="email"
+          />
+          <ErrorMsgField msg={fieldErrors.email?.message} />
         </div>
         <div>
           <label htmlFor={c_Password} className="mb-2 block font-bold">
             パスワード
           </label>
-          {/* <TextInputField	>を定義して使用 option=> formMethods(c_Password), fieldErrors */}
-          {/* <ErrorMsgField>を定義して使用 */}
+          <TextInputField
+            {...formMethods.register(c_Password)}
+            id={c_Password}
+            placeholder="*********"
+            type="password"
+            disabled={isPending || isLoginCompleted} // ログイン処理中またはログイン完了後は入力不可
+            error={!fieldErrors.password}
+            autoComplete="off"
+          />
+          <ErrorMsgField msg={fieldErrors.password?.message} />
+          {/* ルートエラーの表示 */}
+          <ErrorMsgField msg={fieldErrors.root?.message} />
         </div>
+
         <Button
           variant="indigo"
           width="stretch"
           className={twMerge("tracking-widest")}
-          // isBusy
-          disabled={false}
+          isBusy={isPending} // ログイン処理中はボタンを無効化
+          disabled={
+            !formMethods.formState.isValid || isPending || isLoginCompleted
+          } // フォームが無効な場合、またはログイン処理中、ログイン完了後はボタンを無効化
         >
           ログイン
         </Button>
@@ -87,7 +133,7 @@ const Page: React.FC = () => {
         <div>
           <div className="mt-4 flex items-center gap-x-2">
             <FontAwesomeIcon icon={faSpinner} spin />
-            <div>ようこそ、{}テストネーム さん。</div>
+            <div>ようこそ、{userProfile?.name}テストネーム さん。</div>
           </div>
           <NextLink href="/" className="text-blue-500 hover:underline">
             自動的に画面が切り替わらないときはこちらをクリックしてください。
