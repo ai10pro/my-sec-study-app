@@ -121,12 +121,7 @@ const Page: React.FC = () => {
       </div>
       <form
         noValidate
-        onSubmit={(e) => {
-          e.preventDefault();
-          console.log("ログイン処理");
-          setIsLoginCompleted(true);
-          // ここにログイン処理を実装
-        }}
+        onSubmit={formMethods.handleSubmit(onSubmit)} // フォームの送信時にonSubmitを呼び出す
         className={twMerge("mt-4 flex flex-col gap-y-4")}
       >
         <div>
