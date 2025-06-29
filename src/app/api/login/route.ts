@@ -36,19 +36,19 @@ export const POST = async (req: NextRequest) => {
         payload: null,
         message: "メールアドレスまたはパスワードが正しくありません。", // メールアドレスが存在しない場合でもセキュリティ上、このように出力する
       };
-      return NextResponse.json(res, { status: 401 });
+      return NextResponse.json(res);
     }
 
     // パスワードの検証
     const isValidPassword = user.password === loginRequest.password;
     if (!isValidPassword) {
-      // パスワードが不正 ⇒ 401 Unauthorized
       const res: ApiResponse<null> = {
         success: false,
         payload: null,
-        message: "メールアドレスまたはパスワードが正しくありません。",
+        message:
+          "メールアドレスまたはパスワードの組み合わせが正しくありません。",
       };
-      return NextResponse.json(res, { status: 401 });
+      return NextResponse.json(res);
     }
 
     const tokenMaxAgeSeconds = 60 * 60 * 1; // トークンの有効期限を1時間に設定

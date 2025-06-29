@@ -21,29 +21,6 @@ type Props = {
 };
 
 const RootLayout: React.FC<Props> = (props) => {
-  const { children } = props;
-  const { userProfile } = useAuth();
-
-  // if (!userProfile) {
-  //   return (
-  //     <main>
-  //       <div className="text-2xl font-bold">
-  //         <FontAwesomeIcon icon={faTriangleExclamation} className="mr-1.5" />
-  //         ログインが必要なコンテンツ
-  //       </div>
-  //       <div className="mt-4">
-  //         このコンテンツを利用するためには
-  //         <NextLink
-  //           href={`/login`}
-  //           className="px-1 text-blue-500 hover:underline"
-  //         >
-  //           ログイン
-  //         </NextLink>
-  //         してください。
-  //       </div>
-  //     </main>
-  //   );
-  // }
   return (
     <html lang="ja">
       <body>

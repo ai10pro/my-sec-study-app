@@ -88,9 +88,12 @@ const Page: React.FC = () => {
       });
       setIsPending(false); // ログイン処理完了後、状態をリセット
 
-      if (!response.ok) return;
+      if (!response.ok) {
+        return;
+      }
 
       const body = (await response.json()) as ApiResponse<unknown>;
+      console.log(body);
       if (!body.success) {
         // ログイン失敗時の処理
         setRootError(body.message);
