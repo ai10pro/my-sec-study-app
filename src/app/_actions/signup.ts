@@ -1,3 +1,4 @@
+"use server";
 import { emailSchema } from "./../_types/CommonSchemas";
 // signup.ts
 // サインアップの動作全般
