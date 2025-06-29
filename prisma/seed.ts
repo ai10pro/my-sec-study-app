@@ -3,7 +3,7 @@
 import { v4 as uuid } from "uuid";
 import { PrismaClient, Role, Region } from "@prisma/client";
 import { UserSeed, userSeedSchema } from "../src/app/_types/UserSeed";
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -76,7 +76,7 @@ async function main() {
 
   for (const userSeed of userSeeds) {
     // パスワードをハッシュ化
-    const hashedPassword = await bcrypt.hash(userSeed.password, saltRounds);
+    const hashedPassword = await bcryptjs.hash(userSeed.password, saltRounds);
 
     await prisma.user.create({
       data: {
