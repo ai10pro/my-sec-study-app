@@ -1,3 +1,5 @@
+// JWTトークンをデコードしてユーザープロファイルを取得する関数
+
 import { userProfileSchema, type UserProfile } from "@/app/_types/UserProfile";
 import { decodeJwt } from "jose";
 import type { ApiResponse } from "../_types/ApiResponse";
