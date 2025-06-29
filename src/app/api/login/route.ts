@@ -3,6 +3,7 @@ import { NextResponse, NextRequest } from "next/server";
 
 import type { ApiResponse } from "@/app/_types/ApiResponse";
 import { loginRequestSchema } from "@/app/_types/LoginRequest";
+import { createJwt } from "@/app/api/_helper/createJwt";
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -50,7 +51,16 @@ export const POST = async (req: NextRequest) => {
       return NextResponse.json(res, { status: 401 });
     }
 
-    // トークンベース認証のためのトークンを生成
+    const tokenMaxAgeSeconds = 60 * 60 * 1; // トークンの有効期限を1時間に設定
+
+    const jwt = await createJwt(user, tokenMaxAgeSeconds); // JWTトークンを生成
+    const res: ApiResponse<string> = {
+      // レスポンスの生成
+      success: true, // 成功フラグ
+      payload: jwt, // 生成したJWTトークンをペイロードに設定
+      message: "", // メッセージは空
+    };
+    return NextResponse.json(res, { status: 200 });
   } catch (error) {
     const errorMsg =
       error instanceof Error ? error.message : "Internal Server Error";
