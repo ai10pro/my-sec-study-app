@@ -13,6 +13,7 @@ import {
   faEye,
   faEyeSlash,
 } from "@fortawesome/free-solid-svg-icons";
+import { ReCaptchaV2 } from "@/app/_components/ReCaptchaV2";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignupRequest, signupRequestSchema } from "@/app/_types/SignupRequest";
@@ -31,6 +32,9 @@ const Page: React.FC = () => {
   const [isPending, startTransition] = useTransition();
   const [isSignUpCompleted, setIsSignUpCompleted] = useState(false);
   const [showPassword, setShowPassword] = useState(true); // パスワードの表示/非表示を管理
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_V2_SITE_KEY!;
 
   // フォームの処理関連の準備と設定
   const formMethods = useForm<SignupRequest>({
@@ -172,6 +176,13 @@ const Page: React.FC = () => {
           <ErrorMsgField msg={fieldErrors.root?.message} />
         </div>
 
+        <div style={{ margin: "1rem 0" }}>
+          <ReCaptchaV2
+            siteKey={siteKey}
+            onVerify={setRecaptchaToken} // トークンを受け取ってstateを更新
+          />
+        </div>
+
         <Button
           variant="indigo"
           width="stretch"
@@ -179,7 +190,8 @@ const Page: React.FC = () => {
           disabled={
             !formMethods.formState.isValid ||
             formMethods.formState.isSubmitting ||
-            isSignUpCompleted
+            isSignUpCompleted ||
+            !recaptchaToken // reCAPTCHAのトークンが未取得の場合は無効化
           }
         >
           登録
