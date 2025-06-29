@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
 import type { UserProfile } from "@/app/_types/UserProfile";
 import type { ApiResponse } from "@/app/_types/ApiResponse";
-import { User } from "@prisma/client";
+
 import { jwtFetcher } from "@/app/_contexts/jwtFetcher";
 
 interface AuthContextProps {
