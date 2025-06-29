@@ -84,7 +84,7 @@
 ### 1. リポジトリのクローン
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/ai10pro/my-sec-study-app.git
 cd my-sec-study-app
 ```
 
@@ -103,7 +103,7 @@ cp .env.example .env
 `.env`ファイルを編集して必要な環境変数を設定:
 
 ```env
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="file:./app.db"
 JWT_SECRET="your-secret-key-here"
 ```
 
