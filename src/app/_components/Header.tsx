@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/app/_hooks/useAuth";
 import NextLink from "next/link";
 
 import { useRouter } from "next/navigation";
@@ -9,6 +10,7 @@ import { faChalkboardUser } from "@fortawesome/free-solid-svg-icons";
 import { twMerge } from "tailwind-merge";
 
 const Header: React.FC = () => {
+  const { userProfile, logout } = useAuth();
   const router = useRouter();
 
   return (
@@ -27,17 +29,31 @@ const Header: React.FC = () => {
               WebSecStudy
             </NextLink>
           </div>
-          <div
-            className={twMerge(
-              "ml-2 text-sm text-slate-400",
-              "cursor-pointer hover:text-white",
-            )}
-            onClick={() => {
-              router.push("/login");
-            }}
-          >
-            ログイン
-          </div>
+          {userProfile ? (
+            <div className="ml-2 text-sm text-slate-400">
+              <div className="flex items-center gap-x-2">
+                <div className="text-slate-200">{userProfile.name}</div>
+                <div
+                  className={twMerge("cursor-pointer hover:text-white")}
+                  onClick={logout}
+                >
+                  ログアウト
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div
+              className={twMerge(
+                "ml-2 text-sm text-slate-400",
+                "cursor-pointer hover:text-white",
+              )}
+              onClick={() => {
+                router.push("/login");
+              }}
+            >
+              ログイン
+            </div>
+          )}
         </div>
       </div>
     </header>
