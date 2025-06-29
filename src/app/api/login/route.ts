@@ -1,6 +1,6 @@
 import { prisma } from "@/libs/prisma";
 import { NextResponse, NextRequest } from "next/server";
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 
 import type { ApiResponse } from "@/app/_types/ApiResponse";
 import { loginRequestSchema } from "@/app/_types/LoginRequest";
@@ -40,8 +40,8 @@ export const POST = async (req: NextRequest) => {
       return NextResponse.json(res);
     }
 
-    // パスワードの検証（bcryptを使用）
-    const isValidPassword = await bcrypt.compare(
+    // パスワードの検証（bcryptjsを使用）
+    const isValidPassword = await bcryptjs.compare(
       loginRequest.password,
       user.password,
     );
