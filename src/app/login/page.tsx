@@ -4,6 +4,8 @@ import React, { use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import NextLink from "next/link";
+import { decodeJwt } from "jose";
+import { mutate } from "swr";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner, faRightToBracket } from "@fortawesome/free-solid-svg-icons";
@@ -11,10 +13,11 @@ import { twMerge } from "tailwind-merge";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/app/_components/Button";
-import { LoginRequest, loginRequestSchema } from "../_types/LoginRequest";
+import { LoginRequest, loginRequestSchema } from "@/app/_types/LoginRequest";
 import { TextInputField } from "@/app/_components/TextInputField";
 import { ErrorMsgField } from "@/app/_components/ErrorMsgField";
 import { UserProfile, userProfileSchema } from "../_types/UserProfile";
+import { ApiResponse } from "../_types/ApiResponse";
 
 const Page: React.FC = () => {
   const c_Email = "email";
@@ -66,6 +69,49 @@ const Page: React.FC = () => {
       router.refresh(); // ページをリフレッシュ
     }
   }, [isLoginCompleted, router]);
+
+  // フォームの送信処理
+  const onSubmit = async (formValues: LoginRequest) => {
+    const endPoint = "/api/login"; // APIエンドポイントのURL
+    console.log(JSON.stringify(formValues));
+    try {
+      setIsPending(true); // ログイン処理中の状態に設定
+      setRootError(""); // ルートエラーをクリア
+
+      const response = await fetch(endPoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formValues),
+        cache: "no-store", // キャッシュを無効化
+      });
+      setIsPending(false); // ログイン処理完了後、状態をリセット
+
+      if (!response.ok) return;
+
+      const body = (await response.json()) as ApiResponse<unknown>;
+      if (!body.success) {
+        // ログイン失敗時の処理
+        setRootError(body.message);
+        return;
+      }
+
+      const jwt = body.payload as string;
+      // JWTトークンをローカルストレージに保存
+      localStorage.setItem("jwt", jwt);
+      setUserProfile(userProfileSchema.parse(decodeJwt(jwt))); // JWTからユーザープロフィールを取得して状態にセット
+
+      mutate("/api/auth", body); // 認証情報を更新するためにSWRのキャッシュを更新
+      setIsLoginCompleted(true); // ログイン完了状態に設定
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error
+          ? error.message
+          : "予期せぬエラーが発生しました。";
+      setRootError(errorMsg); // エラーメッセージをルートエラーとして設定
+    }
+  };
 
   return (
     <main>
