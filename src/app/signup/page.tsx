@@ -7,7 +7,12 @@ import { useForm } from "react-hook-form";
 import NextLink from "next/link";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSpinner, faPenNib } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSpinner,
+  faPenNib,
+  faEye,
+  faEyeSlash,
+} from "@fortawesome/free-solid-svg-icons";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignupRequest, signupRequestSchema } from "@/app/_types/SignupRequest";
@@ -25,6 +30,7 @@ const Page: React.FC = () => {
 
   const [isPending, startTransition] = useTransition();
   const [isSignUpCompleted, setIsSignUpCompleted] = useState(false);
+  const [showPassword, setShowPassword] = useState(true); // パスワードの表示/非表示を管理
 
   // フォームの処理関連の準備と設定
   const formMethods = useForm<SignupRequest>({
@@ -39,6 +45,11 @@ const Page: React.FC = () => {
       type: "manual",
       message: errorMsg,
     });
+  };
+
+  // パスワードの表示/非表示を切り替える関数
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   // ルートエラーメッセージのクリアに関する設定
@@ -126,15 +137,37 @@ const Page: React.FC = () => {
           <label htmlFor={c_Password} className="mb-2 block font-bold">
             パスワード
           </label>
-          <TextInputField
-            {...formMethods.register(c_Password)}
-            id={c_Password}
-            placeholder="*****"
-            type="password"
-            disabled={isPending || isSignUpCompleted}
-            error={!fieldErrors.password}
-            autoComplete="off"
-          />
+          <div className="relative">
+            <TextInputField
+              {...formMethods.register(c_Password)}
+              id={c_Password}
+              placeholder="*********"
+              type={showPassword ? "text" : "password"}
+              disabled={isPending || isSignUpCompleted} // ログイン処理中またはログイン完了後は入力不可
+              error={!fieldErrors.password}
+              autoComplete="off"
+              className="pr-10" // 右側にアイコン用のスペースを確保
+            />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              disabled={isPending || isSignUpCompleted}
+              className={twMerge(
+                "absolute top-1/2 right-3 -translate-y-1/2",
+                "text-gray-500 hover:text-gray-700",
+                "focus:text-gray-700 focus:outline-none",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+              )}
+              aria-label={
+                showPassword ? "パスワードを非表示" : "パスワードを表示"
+              }
+            >
+              <FontAwesomeIcon
+                icon={showPassword ? faEyeSlash : faEye}
+                className="h-4 w-4"
+              />
+            </button>
+          </div>
           <ErrorMsgField msg={fieldErrors.password?.message} />
           <ErrorMsgField msg={fieldErrors.root?.message} />
         </div>
