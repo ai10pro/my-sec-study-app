@@ -10,11 +10,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner, faPenNib } from "@fortawesome/free-solid-svg-icons";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoginRequest, loginRequestSchema } from "@/app/_types/LoginRequest";
+import { SignupRequest, signupRequestSchema } from "@/app/_types/SignupRequest";
 import { TextInputField } from "@/app/_components/TextInputField";
 import { ErrorMsgField } from "@/app/_components/ErrorMsgField";
 import { Button } from "@/app/_components/Button";
-import { UserProfile } from "../_types/UserProfile";
+import { signupServerAction } from "@/app/_actions/signup";
 
 const Page: React.FC = () => {
   const c_Name = "name";
@@ -27,16 +27,24 @@ const Page: React.FC = () => {
   const [isSignUpCompleted, setIsSignUpCompleted] = useState(false);
 
   // フォームの処理関連の準備と設定
-  const formMethods = useForm<LoginRequest>({
+  const formMethods = useForm<SignupRequest>({
     mode: "onChange",
-    resolver: zodResolver(loginRequestSchema),
+    resolver: zodResolver(signupRequestSchema),
   });
   const fieldErrors = formMethods.formState.errors;
+
+  // ルートエラー（サーバサイドで発生した認証エラー）の表示設定の関数
+  const setRootError = (errorMsg: string) => {
+    formMethods.setError("root", {
+      type: "manual",
+      message: errorMsg,
+    });
+  };
 
   // ルートエラーメッセージのクリアに関する設定
   useEffect(() => {
     const subscription = formMethods.watch((value, { name }) => {
-      if (name === c_Email || name === c_Password) {
+      if (name === c_Name || name === c_Email || name === c_Password) {
         formMethods.clearErrors("root");
       }
     });
@@ -52,6 +60,25 @@ const Page: React.FC = () => {
     }
   }, [formMethods, isSignUpCompleted, router]);
 
+  // フォームの送信処理
+  const onSubmit = async (signupRequest: SignupRequest) => {
+    try {
+      startTransition(async () => {
+        // ServerAction (Custom Invocation) の利用
+        const res = await signupServerAction(signupRequest);
+        if (!res.success) {
+          setRootError(res.message);
+          return;
+        }
+        setIsSignUpCompleted(true);
+      });
+    } catch (e) {
+      const errorMsg =
+        e instanceof Error ? e.message : "予期せぬエラーが発生しました。";
+      setRootError(errorMsg);
+    }
+  };
+
   return (
     <main>
       <div className="text-2xl font-bold">
@@ -60,9 +87,7 @@ const Page: React.FC = () => {
       </div>
       <form
         noValidate
-        onSubmit={() => {
-          // フォームの送信処理
-        }}
+        onSubmit={formMethods.handleSubmit(onSubmit)}
         className={twMerge("mt-4 flex flex-col gap-y-4")}
       >
         <div>
