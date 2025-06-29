@@ -16,6 +16,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { twMerge } from "tailwind-merge";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ReCaptchaV2 } from "@/app/_components/ReCaptchaV2";
 
 import { Button } from "@/app/_components/Button";
 import { LoginRequest, loginRequestSchema } from "@/app/_types/LoginRequest";
@@ -33,7 +34,9 @@ const Page: React.FC = () => {
   const [isPending, setIsPending] = useState(false); // ログイン処理中の状態を管理
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null); // ユーザープロフィールの状態を管理
   const [showPassword, setShowPassword] = useState(true); // パスワードの表示/非表示を管理
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_V2_SITE_KEY!;
   // フォームの処理関連の準備と設定
   const formMethods = useForm<LoginRequest>({
     mode: "onChange",
@@ -189,13 +192,23 @@ const Page: React.FC = () => {
           </div>
         </div>
 
+        <div style={{ margin: "1rem 0" }}>
+          <ReCaptchaV2
+            siteKey={siteKey}
+            onVerify={setRecaptchaToken} // トークンを受け取ってstateを更新
+          />
+        </div>
+
         <Button
           variant="indigo"
           width="stretch"
           className={twMerge("tracking-widest")}
           isBusy={isPending} // ログイン処理中はボタンを無効化
           disabled={
-            !formMethods.formState.isValid || isPending || isLoginCompleted
+            !formMethods.formState.isValid ||
+            isPending ||
+            isLoginCompleted ||
+            !recaptchaToken
           } // フォームが無効な場合、またはログイン処理中、ログイン完了後はボタンを無効化
         >
           ログイン

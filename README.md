@@ -19,6 +19,29 @@
 ### 🛡️ セキュリティ機能
 
 - **入力検証**: Zodスキーマによる厳密な入力バリデーション
+- **ReCaptcha v2**: Google reCAPTCHAによるボット対策とスパム防止
+
+  <details>
+  <summary>📸 ReCaptcha v2機能のデモ</summary>
+
+  ### 静止画
+
+  #### ReCaptchaチェック前 (ログインボタン無効状態)
+
+  ![ReCaptchaチェック前](./docs/images/recaptcha-unchecked.png)
+
+  #### ReCaptchaチェック後 (ログインボタン有効状態)
+
+  ![ReCaptchaチェック後](./docs/images/recaptcha-checked.png)
+
+  ### 動作デモ (GIF)
+
+  ![ReCaptcha動作デモ](./docs/images/recaptcha-demo.gif)
+
+  > **機能説明**: Google reCAPTCHA v2のチェックボックスにチェックが入ると、ログインボタンが有効になります。これにより、ボットによる自動ログイン攻撃を防止し、セキュリティを向上させています。
+
+  </details>
+
 - **パスワード可視化切り替え**: UXを考慮したパスワード入力フィールド
 
   <details>
@@ -63,6 +86,7 @@
 - **React Hook Form** - フォーム管理
 - **SWR** - データフェッチング
 - **FontAwesome** - アイコン
+- **react-google-recaptcha** - Google reCAPTCHA v2 実装
 
 ### バックエンド
 
@@ -105,7 +129,13 @@ cp .env.example .env
 ```env
 DATABASE_URL="file:./app.db"
 JWT_SECRET="your-secret-key-here"
+
+# Google reCAPTCHA v2 設定
+NEXT_PUBLIC_RECAPTCHA_V2_SITE_KEY="your-recaptcha-site-key"
+RECAPTCHA_V2_SECRET_KEY="your-recaptcha-secret-key"
 ```
+
+> **注意**: reCAPTCHA設定については[Google reCAPTCHA](https://www.google.com/recaptcha/)でサイトキーとシークレットキーを取得してください。
 
 ### 4. データベースのセットアップ
 
@@ -134,7 +164,8 @@ src/
 │   │   ├── Button.tsx
 │   │   ├── Header.tsx
 │   │   ├── TextInputField.tsx
-│   │   └── ErrorMsgField.tsx
+│   │   ├── ErrorMsgField.tsx
+│   │   └── ReCaptchaV2.tsx   # Google reCAPTCHA v2 コンポーネント
 │   ├── _contexts/           # React Context (認証など)
 │   │   ├── AuthContext.tsx
 │   │   └── jwtFetcher.ts
@@ -157,6 +188,9 @@ prisma/
 docs/
 └── images/                  # README用画像ファイル
     ├── README.md            # 画像配置ガイド
+    ├── recaptcha-unchecked.png # ReCaptchaチェック前のスクリーンショット
+    ├── recaptcha-checked.png   # ReCaptchaチェック後のスクリーンショット
+    ├── recaptcha-demo.gif      # ReCaptcha動作デモGIF
     ├── password-hidden.png  # パスワード非表示のスクリーンショット
     ├── password-visible.png # パスワード表示のスクリーンショット
     └── password-toggle-demo.gif # パスワード切り替えデモGIF
@@ -191,8 +225,9 @@ npx prisma generate         # クライアント生成
 1. **パスワードの安全な管理** - bcryptjsによるハッシュ化
 2. **JWTの適切な実装** - 有効期限とセキュアな署名
 3. **入力検証** - クライアント・サーバー両側での検証
-4. **エラーハンドリング** - 情報漏洩を防ぐエラーメッセージ
-5. **認証フロー** - 安全なログイン・ログアウト処理
+4. **ボット対策** - Google reCAPTCHA v2によるスパム防止
+5. **エラーハンドリング** - 情報漏洩を防ぐエラーメッセージ
+6. **認証フロー** - 安全なログイン・ログアウト処理
 
 ### モダンフロントエンド開発
 
@@ -207,9 +242,11 @@ npx prisma generate         # クライアント生成
 
 | メールアドレス      | パスワード   | 権限  | 名前        |
 | ------------------- | ------------ | ----- | ----------- |
-| admin01@example.com | password1111 | ADMIN | 高負荷 耐子 |
-| admin02@example.com | password2222 | ADMIN | 不具合 直志 |
-| user01@example.com  | password1111 | USER  | 構文 誤次郎 |
+| admin01★example.com | password1111 | ADMIN | 高負荷 耐子 |
+| admin02★example.com | password2222 | ADMIN | 不具合 直志 |
+| user01★example.com  | password1111 | USER  | 構文 誤次郎 |
+
+※スパム対策で@を★に変更しています。
 
 ## 🔄 開発フロー
 
@@ -245,14 +282,12 @@ npx prisma generate         # クライアント生成
 
 ## 📝 TODO / 今後の実装予定
 
-- [ ] CSRF対策の実装
-- [ ] Rate Limiting の追加
-- [ ] セッションタイムアウト機能
 - [ ] 二要素認証 (2FA)
 - [ ] パスワード強度チェック
 - [ ] ログ監視機能
 - [ ] セキュリティヘッダーの設定
 - [ ] 入力サニタイゼーション強化
+- [ ] reCAPTCHA サーバーサイド検証の実装
 
 ## 🗓️ 開発履歴
 
@@ -260,6 +295,7 @@ npx prisma generate         # クライアント生成
 - **2025/06/29** - ✨ JWT認証システム実装完了
 - **2025/06/29** - 🔐 bcryptによるパスワードハッシュ化実装
 - **2025/06/29** - 🎨 パスワード表示切り替え機能追加
+- **2025/06/30** - 🛡️ Google reCAPTCHA v2によるボット対策機能追加
 
 ---
 
