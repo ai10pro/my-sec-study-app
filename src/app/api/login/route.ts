@@ -1,5 +1,6 @@
 import { prisma } from "@/libs/prisma";
 import { NextResponse, NextRequest } from "next/server";
+import bcrypt from "bcrypt";
 
 import type { ApiResponse } from "@/app/_types/ApiResponse";
 import { loginRequestSchema } from "@/app/_types/LoginRequest";
@@ -39,14 +40,16 @@ export const POST = async (req: NextRequest) => {
       return NextResponse.json(res);
     }
 
-    // パスワードの検証
-    const isValidPassword = user.password === loginRequest.password;
+    // パスワードの検証（bcryptを使用）
+    const isValidPassword = await bcrypt.compare(
+      loginRequest.password,
+      user.password,
+    );
     if (!isValidPassword) {
       const res: ApiResponse<null> = {
         success: false,
         payload: null,
-        message:
-          "メールアドレスまたはパスワードの組み合わせが正しくありません。",
+        message: "メールアドレスまたはパスワードが正しくありません。",
       };
       return NextResponse.json(res);
     }

@@ -3,6 +3,7 @@
 import { v4 as uuid } from "uuid";
 import { PrismaClient, Role, Region } from "@prisma/client";
 import { UserSeed, userSeedSchema } from "../src/app/_types/UserSeed";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -71,17 +72,24 @@ async function main() {
   await prisma.cartItem.deleteMany();
 
   // ユーザ（user）テーブルにテストデータを挿入
-  await prisma.user.createMany({
-    data: userSeeds.map((userSeed) => ({
-      id: uuid(),
-      name: userSeed.name,
-      password: userSeed.password,
-      role: userSeed.role,
-      email: userSeed.email,
-      aboutSlug: userSeed.aboutSlug || null,
-      aboutContent: userSeed.aboutContent || "",
-    })),
-  });
+  const saltRounds = 10; // bcryptのソルトラウンド数
+
+  for (const userSeed of userSeeds) {
+    // パスワードをハッシュ化
+    const hashedPassword = await bcrypt.hash(userSeed.password, saltRounds);
+
+    await prisma.user.create({
+      data: {
+        id: uuid(),
+        name: userSeed.name,
+        password: hashedPassword, // ハッシュ化されたパスワードを保存
+        role: userSeed.role,
+        email: userSeed.email,
+        aboutSlug: userSeed.aboutSlug || null,
+        aboutContent: userSeed.aboutContent || "",
+      },
+    });
+  }
 
   // 商品（product）テーブルにテストデータを挿入
   await prisma.product.createMany({
